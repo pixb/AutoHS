@@ -2,7 +2,7 @@
 对战测试Demo
 """
 
-from update_game_state_demo import  *
+from test_game_state import  *
 from strategy import  *
 
 DEBUG_USE_CARD = True
