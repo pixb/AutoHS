@@ -1,5 +1,8 @@
 from strategy import *
 
+"""
+这个Demo用来调试读取Power.log，并完成解析初始化游戏状态的过程
+"""
 if __name__ == "__main__":
     log_iter = log_iter_func(HEARTHSTONE_POWER_LOG_PATH)
     state = GameState()
@@ -15,5 +18,7 @@ if __name__ == "__main__":
 
     with open("game_state_snapshot.txt", "w", encoding="utf8") as f:
         f.write(str(state))
+
+    print("game_state.my_entity:{}".format(state.my_entity))
 
     strategy_state = StrategyState(state)

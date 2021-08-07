@@ -44,8 +44,9 @@ def Battling():
             hero_power.use_with_arg(strategy_state, -1, *args)
 
     print("power:\n"
-          "\t hero_power:{}"
-          .format(hero_power))
+          "\t hero_power:{}\n"
+          "\t strategy_state.my_last_mana:{}\n"
+          .format(hero_power, strategy_state.my_last_mana))
     # if DEBUG_END_TURN:
     #     click.end_turn()
 
