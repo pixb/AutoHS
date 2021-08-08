@@ -3,7 +3,6 @@ __pycache__/
 venv/
 img/
 backup.md
-test*
 *.json
 *.log
 *.txt
