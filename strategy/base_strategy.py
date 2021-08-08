@@ -1,15 +1,18 @@
-import click
-import keyboard
-import sys
+# -*- coding: utf-8 -*-
+# @Time    : 2021/8/8 7:22
+# @Author  : pixb
+# @Email   : tpxsky@163.com
+# @File    : base_strategy.py
+# @Software: PyCharm
+# @Description: 策略接口
+import abc
+
 import random
 
 from card.basic_card import MinionNoPoint
-from game_state import *
-from log_op import *
 from strategy_entity import *
 
-
-class StrategyState:
+class base_strategy(metaclass=abc.ABCMeta):
     def __init__(self, game_state=None):
         self.oppo_minions = []
         self.oppo_graveyard = []
@@ -282,42 +285,9 @@ class StrategyState:
             tmp.my_hand_cards[i] = copy.deepcopy(self.my_hand_cards[i])
         return tmp
 
+    @abc.abstractmethod
     def best_h_index_arg(self):
-        debug_print()
-        best_delta_h = 0
-        best_index = -1
-        best_args = []
-
-        for hand_card_index, hand_card in enumerate(self.my_hand_cards):
-            delta_h = 0
-            args = []
-
-            if hand_card.current_cost > self.my_last_mana:
-                debug_print(f"跳过第[{hand_card_index}]张卡牌({hand_card.name})")
-                continue
-
-            detail_card = hand_card.detail_card
-            if detail_card is None:
-                if hand_card.cardtype == CARD_MINION and not hand_card.battlecry:
-                    delta_h, *args = MinionNoPoint.best_h_and_arg(self, hand_card_index)
-                    debug_print(f"(默认行为) card[{hand_card_index}]({hand_card.name}) "
-                                f"delta_h: {delta_h}, *args: {[]}")
-                else:
-                    debug_print(f"卡牌[{hand_card_index}]({hand_card.name})无法评判")
-            else:
-                delta_h, *args = detail_card.best_h_and_arg(self, hand_card_index)
-                debug_print(f"(手写行为) card[{hand_card_index}]({hand_card.name}) "
-                            f"delta_h: {delta_h}, *args: {args}")
-
-            if delta_h > best_delta_h:
-                best_delta_h = delta_h
-                best_index = hand_card_index
-                best_args = args
-
-        debug_print(f"决策结果: best_delta_h:{best_delta_h}, "
-                    f"best_index:{best_index}, best_args:{best_args}")
-        debug_print()
-        return best_delta_h, best_index, best_args
+        pass
 
     # 会返回这张卡的cost
     def use_card(self, index, *args):
@@ -335,28 +305,29 @@ class StrategyState:
         return hand_card.current_cost
 
 
-if __name__ == "__main__":
-    keyboard.add_hotkey("ctrl+q", sys.exit)
 
-    log_iter = log_iter_func(HEARTHSTONE_POWER_LOG_PATH)
-    state = GameState()
-
-    while True:
-        log_container = next(log_iter)
-        if log_container.length > 0:
-            for x in log_container.message_list:
-                update_state(state, x)
-            strategy_state = StrategyState(state)
-
-            with open("game_state_snapshot.txt", "w", encoding="utf8") as f:
-                f.write(str(state))
-
-            mine_index, oppo_index = strategy_state.get_best_attack_target()
-            debug_print(f"我的决策是: mine_index: {mine_index}, oppo_index: {oppo_index}")
-
-            if mine_index != -1:
-                if oppo_index == -1:
-                    click.minion_beat_hero(mine_index, strategy_state.my_minion_num)
-                else:
-                    click.minion_beat_minion(mine_index, strategy_state.my_minion_num,
-                                             oppo_index, strategy_state.oppo_minion_num)
+# if __name__ == "__main__":
+#     keyboard.add_hotkey("ctrl+q", sys.exit)
+#
+#     log_iter = log_iter_func(HEARTHSTONE_POWER_LOG_PATH)
+#     state = GameState()
+#
+#     while True:
+#         log_container = next(log_iter)
+#         if log_container.length > 0:
+#             for x in log_container.message_list:
+#                 update_state(state, x)
+#             strategy_state = base_strategy(state)
+#
+#             with open("game_state_snapshot.txt", "w", encoding="utf8") as f:
+#                 f.write(str(state))
+#
+#             mine_index, oppo_index = strategy_state.get_best_attack_target()
+#             debug_print(f"我的决策是: mine_index: {mine_index}, oppo_index: {oppo_index}")
+#
+#             if mine_index != -1:
+#                 if oppo_index == -1:
+#                     click.minion_beat_hero(mine_index, strategy_state.my_minion_num)
+#                 else:
+#                     click.minion_beat_minion(mine_index, strategy_state.my_minion_num,
+#                                              oppo_index, strategy_state.oppo_minion_num)

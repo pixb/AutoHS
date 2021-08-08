@@ -1,4 +1,3 @@
-import click
 from card.basic_card import *
 
 
