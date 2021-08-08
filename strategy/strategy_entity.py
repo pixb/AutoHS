@@ -1,4 +1,4 @@
-from json_op import *
+from model.json_op import *
 from abc import abstractmethod
 from card.id2card import ID2CARD_DICT
 import copy

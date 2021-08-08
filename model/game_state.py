@@ -1,9 +1,5 @@
-import sys
-
-from log_op import *
-from json_op import *
-from strategy_entity import *
-from print_info import *
+from strategy.strategy_entity import *
+from utils.print_info import *
 import constants.constants
 
 MY_NAME = constants.constants.YOUR_NAME

@@ -10,7 +10,7 @@ import abc
 import random
 
 from card.basic_card import MinionNoPoint
-from strategy_entity import *
+from strategy.strategy_entity import *
 
 class base_strategy(metaclass=abc.ABCMeta):
     def __init__(self, game_state=None):

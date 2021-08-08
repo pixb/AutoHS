@@ -1,14 +1,11 @@
 import win32gui
-import win32api
 import win32con
-import pywintypes
 import time
 from pynput.mouse import Button, Controller
 import random
 import sys
 
-from constants.constants import *
-from print_info import *
+from utils.print_info import *
 
 
 def click_button(x, y, button):

@@ -15,14 +15,14 @@ def print_info_init():
     global sys_file_handle
     global info_file_handle
 
-    if not os.path.exists("./log/"):
-        os.mkdir("./log/")
+    if not os.path.exists("../log/"):
+        os.mkdir("../log/")
 
-    error_file_handle = open("./log/error_log.txt", "w", encoding="utf8")
-    warn_file_handle = open("./log/warn_log.txt", "w", encoding="utf8")
-    debug_file_handle = open("./log/debug_log.txt", "w", encoding="utf8")
-    sys_file_handle = open("./log/sys_log.txt", "w", encoding="utf8")
-    info_file_handle = open("./log/info_log.txt", "w", encoding="utf8")
+    error_file_handle = open("../log/error_log.txt", "w", encoding="utf8")
+    warn_file_handle = open("../log/warn_log.txt", "w", encoding="utf8")
+    debug_file_handle = open("../log/debug_log.txt", "w", encoding="utf8")
+    sys_file_handle = open("../log/sys_log.txt", "w", encoding="utf8")
+    info_file_handle = open("../log/info_log.txt", "w", encoding="utf8")
 
 
 def print_info_close():

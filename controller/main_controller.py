@@ -11,13 +11,12 @@ import time
 
 import keyboard
 
-import get_screen
-from log_op import log_iter_func
+from model.log_op import log_iter_func
 from model.game_state import check_name, GameState, update_state
 from model.main_model import main_model
-from print_info import *
+from utils.print_info import *
 from strategy.general_strategy import general_strategy
-from view import click
+from view import click, get_screen
 from view.main_view import main_view
 
 time_begin = 0.0

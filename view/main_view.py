@@ -7,7 +7,7 @@
 # @Description: 只写和View相关的代码，例如输出提示信息，点击等操作都要定义到这里
 import time
 
-from print_info import info_print
+from utils.print_info import info_print
 
 
 class main_view(object):

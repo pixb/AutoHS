@@ -1,7 +1,7 @@
 import time
 from abc import ABC, abstractmethod
 from view import click
-from print_info import *
+from utils.print_info import *
 
 
 class Card(ABC):

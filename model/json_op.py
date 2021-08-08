@@ -2,8 +2,7 @@ import sys
 
 import requests
 import json
-import os
-from print_info import *
+from utils.print_info import *
 
 
 # 来源于互联网的炉石JSON数据下载API, 更多信息可以访问 https://hearthstonejson.com/
@@ -18,7 +17,7 @@ def download_json(json_path):
 def read_json(re_download=False):
     dir_path = os.path.dirname(__file__)
     if dir_path == "":
-        dir_path = "."
+        dir_path = ".."
     json_path = dir_path + "/cards.json"
 
     if not os.path.exists(json_path):
@@ -59,7 +58,7 @@ def query_json_dict(key):
 JSON_DICT = read_json()
 
 if __name__ == "__main__":
-    with open("id-name.txt", "w", encoding="utf8") as f:
+    with open("../id-name.txt", "w", encoding="utf8") as f:
         for key, val in JSON_DICT.items():
             f.write(key + " " + val["name"] + "\n")
 

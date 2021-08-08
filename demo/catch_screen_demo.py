@@ -7,8 +7,7 @@ import cv2
 import time
 import math
 
-import get_screen
-
+from view import get_screen
 
 PRINT_ALL_AREA_LIST = []
 # AREA_LIST = [((1495, 465), (1620, 522))]
