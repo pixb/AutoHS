@@ -12,7 +12,7 @@ import time
 import keyboard
 
 from model.log_op import log_iter_func
-from model.game_state import check_name, GameState, update_state, update_my_oppo_state
+from model.game_state import check_name, GameState, update_state
 from model.main_model import main_model
 from utils.print_info import *
 from strategy.general_strategy import general_strategy
@@ -133,7 +133,7 @@ class main_controller(object):
                 return FSM_BATTLING
             if game_state.is_end:
                 return FSM_QUITTING_BATTLE
-            update_my_oppo_state(game_state)
+            game_state.update_user_state()
             strategy_state = general_strategy(game_state)
             hand_card_num = game_state.my_state.my_hand_card_num
 
@@ -221,7 +221,7 @@ class main_controller(object):
                 time.sleep(STATE_CHECK_INTERVAL)
             # time.sleep(0.5)
 
-            update_my_oppo_state(game_state)
+            game_state.update_user_state()
             strategy_state = general_strategy(game_state)
 
             # 考虑要不要出牌

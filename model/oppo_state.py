@@ -15,6 +15,44 @@ class oppo_state:
         self.oppo_weapon = None
         self.oppo_hero_power = None
 
+    def update(self, game_state):
+        self.oppo_hand_card_num = 0
+        self.oppo_minions.clear()
+        self.oppo_graveyard.clear()
+
+        for entity in game_state.entity_dict.values():
+            if entity.query_tag("ZONE") == "HAND":
+                if not game_state.is_my_entity(entity):
+                    self.oppo_hand_card_num += 1
+
+            elif entity.zone == "PLAY":
+                if entity.cardtype == "MINION":
+                    minion = entity.corresponding_entity
+                    if not game_state.is_my_entity(entity):
+                        self.oppo_minions.append(minion)
+
+                elif entity.cardtype == "HERO":
+                    hero = entity.corresponding_entity
+                    if not game_state.is_my_entity(entity):
+                        self.oppo_hero = hero
+
+                elif entity.cardtype == "HERO_POWER":
+                    hero_power = entity.corresponding_entity
+                    if game_state.is_my_entity(entity):
+                        self.oppo_hero_power = hero_power
+
+                elif entity.cardtype == "WEAPON":
+                    weapon = entity.corresponding_entity
+                    if not game_state.is_my_entity(entity):
+                        self.oppo_weapon = weapon
+
+            elif entity.zone == "GRAVEYARD":
+                if not game_state.is_my_entity(entity):
+                    self.oppo_graveyard.append(entity)
+
+        # 从这里取用户的一些信息
+        self.oppo_minions.sort(key=lambda temp: temp.zone_pos)
+
     @property
     def oppo_minion_num(self):
         return len(self.oppo_minions)

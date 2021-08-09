@@ -25,7 +25,8 @@ def update_strategy_state():
                   game_state.my_entity.query_tag("PLAYSTATE"),
                   game_state.is_my_turn,
                   game_state.game_num_turns_in_play))
-    update_my_oppo_state(game_state)
+
+    game_state.update_user_state()
     return general_strategy(game_state)
 
 

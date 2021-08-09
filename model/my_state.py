@@ -19,6 +19,52 @@ class my_state:
         self.my_graveyard = []
         self.can_use_power = False
 
+    def update(self, game_state):
+        self.my_hand_cards.clear()
+        self.my_minions.clear()
+        self.my_graveyard.clear()
+
+        for entity in game_state.entity_dict.values():
+            if entity.query_tag("ZONE") == "HAND":
+                if game_state.is_my_entity(entity):
+                    hand_card = entity.corresponding_entity
+                    self.my_hand_cards.append(hand_card)
+
+            elif entity.zone == "PLAY":
+                if entity.cardtype == "MINION":
+                    minion = entity.corresponding_entity
+                    if game_state.is_my_entity(entity):
+                        self.my_minions.append(minion)
+
+                elif entity.cardtype == "HERO":
+                    hero = entity.corresponding_entity
+                    if game_state.is_my_entity(entity):
+                        self.my_hero = hero
+
+                elif entity.cardtype == "HERO_POWER":
+                    hero_power = entity.corresponding_entity
+                    if game_state.is_my_entity(entity):
+                        self.my_hero_power = hero_power
+
+                elif entity.cardtype == "WEAPON":
+                    weapon = entity.corresponding_entity
+                    if game_state.is_my_entity(entity):
+                        self.my_weapon = weapon
+
+            elif entity.zone == "GRAVEYARD":
+                if game_state.is_my_entity(entity):
+                    self.my_graveyard.append(entity)
+
+        # 从这里取用户的一些信息
+        if game_state.my_entity_id != 0:
+            # print("my entity -->{}".format(state.my_entity.query_tag("RESOURCES")))
+            self.my_total_mana = int(game_state.my_entity.query_tag("RESOURCES"))
+            self.my_used_mana = int(game_state.my_entity.query_tag("RESOURCES_USED"))
+            self.my_temp_mana = int(game_state.my_entity.query_tag("TEMP_RESOURCES"))
+
+        self.my_minions.sort(key=lambda temp: temp.zone_pos)
+        self.my_hand_cards.sort(key=lambda temp: temp.zone_pos)
+
     @property
     def my_last_mana(self):
         return self.my_total_mana - self.my_used_mana + self.my_temp_mana
