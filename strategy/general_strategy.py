@@ -19,11 +19,11 @@ class general_strategy(base_strategy):
         best_index = -1
         best_args = []
 
-        for hand_card_index, hand_card in enumerate(self.my_hand_cards):
+        for hand_card_index, hand_card in enumerate(game_state.my_state.my_hand_cards):
             delta_h = 0
             args = []
 
-            if hand_card.current_cost > self.my_last_mana:
+            if hand_card.current_cost > game_state.my_state.my_last_mana:
                 debug_print(f"跳过第[{hand_card_index}]张卡牌({hand_card.name})")
                 continue
 

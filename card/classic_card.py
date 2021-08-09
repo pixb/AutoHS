@@ -7,8 +7,8 @@ class LightingBolt(SpellPointOppo):
     bias = -4
 
     @classmethod
-    def best_h_and_arg(cls, state, hand_card_index):
-        spell_power = state.my_total_spell_power
+    def best_h_and_arg(cls, state, game_state, hand_card_index):
+        spell_power = state.my_total_spell_power(game_state)
         damage = 3 + spell_power
         best_delta_h = state.oppo_hero.delta_h_after_damage(damage)
         best_oppo_index = -1
@@ -166,11 +166,11 @@ class Abomination(MinionNoPoint):
     keep_in_hand_bool = True
 
     @classmethod
-    def utilize_delta_h_and_arg(cls, state, hand_card_index):
+    def utilize_delta_h_and_arg(cls, state, game_state, hand_card_index):
         h_sum = 0
-        for oppo_minion in state.oppo_minions:
+        for oppo_minion in game_state.oppo_state.oppo_minions:
             h_sum += oppo_minion.delta_h_after_damage(2)
-        for my_minion in state.my_minions:
+        for my_minion in game_state.my_state.my_minions:
             h_sum -= my_minion.delta_h_after_damage(2)
         h_sum += state.oppo_hero.delta_h_after_damage(2)
         h_sum -= state.my_hero.delta_h_after_damage(2)

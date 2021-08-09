@@ -100,14 +100,14 @@ class DevouringPlague(SpellNoPoint):
     bias = -4  # 把吸的血直接算进bias
 
     @classmethod
-    def best_h_and_arg(cls, state, hand_card_index):
+    def best_h_and_arg(cls, state, game_state, hand_card_index):
         curr_h = state.heuristic_value
 
         delta_h_sum = 0
         sample_times = 5
 
         for i in range(sample_times):
-            tmp_state = state.copy_new_one()
+            tmp_state = state.copy_new_one(game_state)
             for j in range(4):
                 tmp_state.random_distribute_damage(1, [i for i in range(tmp_state.oppo_minion_num)], [])
 

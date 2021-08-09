@@ -25,6 +25,7 @@ def update_strategy_state():
                   game_state.my_entity.query_tag("PLAYSTATE"),
                   game_state.is_my_turn,
                   game_state.game_num_turns_in_play))
+    update_my_oppo_state(game_state)
     return general_strategy(game_state)
 
 
@@ -44,22 +45,22 @@ def use_card():
 def use_power():
     strategy_state = update_strategy_state()
     # 考虑要不要用技能
-    hero_power = strategy_state.my_detail_hero_power
-    if hero_power and strategy_state.my_last_mana >= 2:
-        delta_h, *args = hero_power.best_h_and_arg(strategy_state, -1)
+    hero_power = game_state.my_state.my_detail_hero_power
+    if hero_power and game_state.my_state.my_last_mana >= 2:
+        delta_h, *args = hero_power.best_h_and_arg(strategy_state, game_state, -1)
         debug_print(str(delta_h) + str(args))
         if delta_h > 0:
-            hero_power.use_with_arg(strategy_state, -1, *args)
+            hero_power.use_with_arg(strategy_state, game_state, -1, *args)
 
     print("power:\n"
           "\t hero_power:{}\n"
           "\t strategy_state.my_last_mana:{}\n"
-          .format(hero_power, strategy_state.my_last_mana))
+          .format(hero_power, game_state.my_state.my_last_mana))
 
 
 def minion_beat():
     strategy_state = update_strategy_state()
-    mine_index, oppo_index = strategy_state.get_best_attack_target()
+    mine_index, oppo_index = strategy_state.get_best_attack_target(game_state)
     if mine_index != -1:
         if oppo_index == -1:
             click.minion_beat_hero(mine_index, strategy_state.my_minion_num)

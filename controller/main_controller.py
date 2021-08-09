@@ -12,7 +12,7 @@ import time
 import keyboard
 
 from model.log_op import log_iter_func
-from model.game_state import check_name, GameState, update_state
+from model.game_state import check_name, GameState, update_state, update_my_oppo_state
 from model.main_model import main_model
 from utils.print_info import *
 from strategy.general_strategy import general_strategy
@@ -133,15 +133,15 @@ class main_controller(object):
                 return FSM_BATTLING
             if game_state.is_end:
                 return FSM_QUITTING_BATTLE
-
+            update_my_oppo_state(game_state)
             strategy_state = general_strategy(game_state)
-            hand_card_num = strategy_state.my_hand_card_num
+            hand_card_num = game_state.my_state.my_hand_card_num
 
             # 等待被替换的卡牌 ZONE=HAND
             # 注意后手时幸运币会作为第五张卡牌算在手牌里, 故只取前四张手牌
             # 但是后手时 hand_card_num 仍然是 5
             for my_hand_index, my_hand_card in \
-                    enumerate(strategy_state.my_hand_cards[:4]):
+                    enumerate(game_state.my_state.my_hand_cards[:4]):
                 detail_card = my_hand_card.detail_card
 
                 if detail_card is None:
@@ -221,6 +221,7 @@ class main_controller(object):
                 time.sleep(STATE_CHECK_INTERVAL)
             # time.sleep(0.5)
 
+            update_my_oppo_state(game_state)
             strategy_state = general_strategy(game_state)
 
             # 考虑要不要出牌
@@ -230,10 +231,9 @@ class main_controller(object):
                 continue
 
             # 考虑要不要用技能
-            hero_power = strategy_state.my_detail_hero_power
-            print("#### strategy my_last_manna:{}".format(strategy_state.my_last_mana))
+            hero_power = game_state.my_state.my_detail_hero_power
             print("#### my_state my_last_manna:{}".format(game_state.my_state.my_last_mana))
-            if hero_power and strategy_state.my_last_mana >= 2:
+            if hero_power and game_state.my_state.my_last_mana >= 2:
                 delta_h, *args = hero_power.best_h_and_arg(strategy_state, game_state, -1)
                 debug_print(str(delta_h) + str(args))
                 if delta_h > 0:
@@ -241,14 +241,14 @@ class main_controller(object):
                     continue
 
             # 考虑随从怎么打架
-            mine_index, oppo_index = strategy_state.get_best_attack_target()
+            mine_index, oppo_index = strategy_state.get_best_attack_target(game_state)
 
             if mine_index != -1:
                 if oppo_index == -1:
-                    click.minion_beat_hero(mine_index, strategy_state.my_minion_num)
+                    click.minion_beat_hero(mine_index, game_state.my_state.my_minion_num)
                 else:
-                    click.minion_beat_minion(mine_index, strategy_state.my_minion_num,
-                                             oppo_index, strategy_state.oppo_minion_num)
+                    click.minion_beat_minion(mine_index, game_state.my_state.my_minion_num,
+                                             oppo_index, game_state.oppo_state.oppo_minion_num)
             else:
                 click.end_turn()
                 time.sleep(STATE_CHECK_INTERVAL)

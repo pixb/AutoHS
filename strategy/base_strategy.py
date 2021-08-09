@@ -14,130 +14,43 @@ from strategy.strategy_entity import *
 
 class base_strategy(metaclass=abc.ABCMeta):
     def __init__(self, game_state=None):
-        self.oppo_minions = []
-        self.oppo_graveyard = []
-        self.my_minions = []
-        self.my_hand_cards = []
-        self.my_graveyard = []
-
-        self.my_hero = None
-        self.my_hero_power = None
-        self.can_use_power = False
-        self.my_weapon = None
-        self.oppo_hero = None
-        self.oppo_hero_power = None
-        self.oppo_weapon = None
-        self.oppo_hand_card_num = 0
-
-        self.my_total_mana = int(game_state.my_entity.query_tag("RESOURCES"))
-        self.my_used_mana = int(game_state.my_entity.query_tag("RESOURCES_USED"))
-        self.my_temp_mana = int(game_state.my_entity.query_tag("TEMP_RESOURCES"))
-
-        for entity in game_state.entity_dict.values():
-            if entity.query_tag("ZONE") == "HAND":
-                if game_state.is_my_entity(entity):
-                    hand_card = entity.corresponding_entity
-                    self.my_hand_cards.append(hand_card)
-                else:
-                    self.oppo_hand_card_num += 1
-
-            elif entity.zone == "PLAY":
-                if entity.cardtype == "MINION":
-                    minion = entity.corresponding_entity
-                    if game_state.is_my_entity(entity):
-                        self.my_minions.append(minion)
-                    else:
-                        self.oppo_minions.append(minion)
-
-                elif entity.cardtype == "HERO":
-                    hero = entity.corresponding_entity
-                    if game_state.is_my_entity(entity):
-                        self.my_hero = hero
-                    else:
-                        self.oppo_hero = hero
-
-                elif entity.cardtype == "HERO_POWER":
-                    hero_power = entity.corresponding_entity
-                    if game_state.is_my_entity(entity):
-                        self.my_hero_power = hero_power
-                    else:
-                        self.oppo_hero_power = hero_power
-
-                elif entity.cardtype == "WEAPON":
-                    weapon = entity.corresponding_entity
-                    if game_state.is_my_entity(entity):
-                        self.my_weapon = weapon
-                    else:
-                        self.oppo_weapon = weapon
-
-            elif entity.zone == "GRAVEYARD":
-                if game_state.is_my_entity(entity):
-                    self.my_graveyard.append(entity)
-                else:
-                    self.oppo_graveyard.append(entity)
-
-        self.my_minions.sort(key=lambda temp: temp.zone_pos)
-        self.oppo_minions.sort(key=lambda temp: temp.zone_pos)
-        self.my_hand_cards.sort(key=lambda temp: temp.zone_pos)
-
-        self.debug_print_out()
         self.debug_print_out_state(game_state)
 
-    def debug_print_battlefield(self):
+    def debug_print_battlefield(self, game_state):
         if not DEBUG_PRINT:
             return
 
         debug_print("对手英雄:")
-        debug_print("    " + str(self.oppo_hero))
+        debug_print("    " + str(game_state.oppo_state.oppo_hero))
         debug_print(f"技能:")
-        debug_print("    " + self.oppo_hero_power.name)
-        if self.oppo_weapon:
+        debug_print("    " + game_state.oppo_state.oppo_hero_power.name)
+        if game_state.oppo_state.oppo_weapon:
             debug_print("头上有把武器:")
-            debug_print("    " + str(self.oppo_weapon))
-        if self.oppo_minion_num > 0:
-            debug_print(f"对手有{self.oppo_minion_num}个随从:")
-            for minion in self.oppo_minions:
+            debug_print("    " + str(game_state.oppo_state.oppo_weapon))
+        if game_state.oppo_state.oppo_minion_num > 0:
+            debug_print(f"对手有{game_state.oppo_state.oppo_minion_num}个随从:")
+            for minion in game_state.oppo_state.oppo_minions:
                 debug_print("    " + str(minion))
         else:
             debug_print(f"对手没有随从")
-        debug_print(f"总卡费启发值: {self.oppo_heuristic_value}")
+        debug_print(f"总卡费启发值: {game_state.oppo_state.oppo_heuristic_value}")
 
         debug_print()
 
         debug_print("我的英雄:")
-        debug_print("    " + str(self.my_hero))
+        debug_print("    " + str(game_state.my_state.my_hero))
         debug_print(f"技能:")
-        debug_print("    " + self.my_hero_power.name)
-        if self.my_weapon:
+        debug_print("    " + game_state.my_state.my_hero_power.name)
+        if game_state.my_state.my_weapon:
             debug_print("头上有把武器:")
-            debug_print("    " + str(self.my_weapon))
-        if self.my_minion_num > 0:
-            debug_print(f"我有{self.my_minion_num}个随从:")
-            for minion in self.my_minions:
+            debug_print("    " + str(game_state.my_state.my_weapon))
+        if game_state.my_state.my_minion_num > 0:
+            debug_print(f"我有{game_state.my_state.my_minion_num}个随从:")
+            for minion in game_state.my_state.my_minions:
                 debug_print("    " + str(minion))
         else:
             debug_print("我没有随从")
-        debug_print(f"总卡费启发值: {self.my_heuristic_value}")
-
-    def debug_print_out(self):
-        if not DEBUG_PRINT:
-            return
-
-        debug_print(f"对手墓地:")
-        debug_print("    " + ", ".join([entity.name for entity in self.oppo_graveyard]))
-        debug_print(f"对手有{self.oppo_hand_card_num}张手牌")
-
-        self.debug_print_battlefield()
-        debug_print()
-
-        # debug_print(f"水晶: {self.my_last_mana}/{self.my_total_mana}")
-        debug_print(f"我有{self.my_hand_card_num}张手牌:")
-        for hand_card in self.my_hand_cards:
-            debug_print(f"    [{hand_card.zone_pos}] {hand_card.name} "
-                        f"cost:{hand_card.current_cost}")
-        debug_print(f"我的墓地:")
-        debug_print("    " + ", ".join([entity.name for entity in self.my_graveyard]))
-
+        debug_print(f"总卡费启发值: {game_state.my_state.my_heuristic_value}")
 
     def debug_print_out_state(self, game_state):
         if not DEBUG_PRINT:
@@ -147,7 +60,7 @@ class base_strategy(metaclass=abc.ABCMeta):
         debug_print("    " + ", ".join([entity.name for entity in game_state.oppo_state.oppo_graveyard]))
         debug_print(f"game_state 对手有{game_state.oppo_state.oppo_hand_card_num}张手牌")
 
-        self.debug_print_battlefield()
+        self.debug_print_battlefield(game_state)
         debug_print()
 
         debug_print(f"game_state 水晶: {game_state.my_state.my_last_mana}/{game_state.my_state.my_total_mana}")
@@ -158,69 +71,30 @@ class base_strategy(metaclass=abc.ABCMeta):
         debug_print(f"我的墓地:")
         debug_print("    " + ", ".join([entity.name for entity in game_state.my_state.my_graveyard]))
 
-    @property
-    def my_last_mana(self):
-        return self.my_total_mana - self.my_used_mana + self.my_temp_mana
 
-    @property
-    def oppo_minion_num(self):
-        return len(self.oppo_minions)
-
-    @property
-    def my_minion_num(self):
-        return len(self.my_minions)
-
-    @property
-    def my_hand_card_num(self):
-        return len(self.my_hand_cards)
-
-    # 用卡费体系算启发值
-    @property
-    def oppo_heuristic_value(self):
-        total_h_val = self.oppo_hero.heuristic_val
-        if self.oppo_weapon:
-            total_h_val += self.oppo_weapon.heuristic_val
-        for minion in self.oppo_minions:
-            total_h_val += minion.heuristic_val
-        return total_h_val
-
-    @property
-    def my_heuristic_value(self):
-        total_h_val = self.my_hero.heuristic_val
-        if self.my_weapon:
-            total_h_val += self.my_weapon.heuristic_val
-        for minion in self.my_minions:
-            total_h_val += minion.heuristic_val
-        return total_h_val
 
     @property
     def heuristic_value(self):
         return round(self.my_heuristic_value - self.oppo_heuristic_value, 3)
 
     @property
-    def min_cost(self):
+    def min_cost(self, game_state):
         minium = 100
-        for hand_card in self.my_hand_cards:
+        for hand_card in game_state.my_state.my_hand_cards:
             minium = min(minium, hand_card.current_cost)
         return minium
 
-    @property
-    def my_total_spell_power(self):
-        return sum([minion.spell_power for minion in self.my_minions])
 
-    @property
-    def my_detail_hero_power(self):
-        return self.my_hero_power.detail_hero_power
 
-    def fight_between(self, oppo_index, my_index):
-        oppo_minion = self.oppo_minions[oppo_index]
-        my_minion = self.my_minions[my_index]
+    def fight_between(self, oppo_index, my_index, game_state):
+        oppo_minion = game_state.oppo_state.oppo_minions[oppo_index]
+        my_minion = game_state.my_state.my_minions[my_index]
 
         if oppo_minion.get_damaged(my_minion.attack):
-            self.oppo_minions.pop(oppo_index)
+            game_state.oppo_state.oppo_minions.pop(oppo_index)
 
         if my_minion.get_damaged(oppo_minion.attack):
-            self.my_minions.pop(my_index)
+            game_state.my_state.my_minions.pop(my_index)
 
     def random_distribute_damage(self, damage, oppo_index_list, my_index_list):
         if len(oppo_index_list) == len(my_index_list) == 0:
@@ -239,29 +113,29 @@ class base_strategy(metaclass=abc.ABCMeta):
             if minion.get_damaged(damage):
                 self.my_minions.pop(my_index)
 
-    def get_best_attack_target(self):
+    def get_best_attack_target(self, game_state):
         could_attack_oppos = []
         has_taunt = False
 
-        for i in range(len(self.oppo_minions)):
-            if self.oppo_minions[i].taunt:
+        for i in range(len(game_state.oppo_state.oppo_minions)):
+            if game_state.oppo_state.oppo_minions[i].taunt:
                 could_attack_oppos.append(i)
                 has_taunt = True
 
         if not has_taunt:
-            could_attack_oppos = [i for i in range(len(self.oppo_minions))]
+            could_attack_oppos = [i for i in range(len(game_state.oppo_state.oppo_minions))]
 
         max_delta_h_val = 0
         max_my_index = -1
         max_oppo_index = -1
         min_attack = 0
 
-        for my_index, my_minion in enumerate(self.my_minions):
+        for my_index, my_minion in enumerate(game_state.my_state.my_minions):
             if not my_minion.can_attack_minion:
                 continue
 
             for oppo_index in could_attack_oppos:
-                oppo_minion = self.oppo_minions[oppo_index]
+                oppo_minion = game_state.oppo_state.oppo_minions[oppo_index]
                 if oppo_minion.stealth:
                     continue
 
@@ -284,7 +158,7 @@ class base_strategy(metaclass=abc.ABCMeta):
             # 如果没有墙,自己又能打脸,应该试一试
             if not has_taunt:
                 if my_minion.can_beat_face:
-                    face_delta_h = self.oppo_hero.delta_h_after_damage(my_minion.attack)
+                    face_delta_h = game_state.oppo_state.oppo_hero.delta_h_after_damage(my_minion.attack)
                     if face_delta_h > max_delta_h_val:
                         max_delta_h_val = face_delta_h
                         max_my_index = my_index
@@ -295,15 +169,15 @@ class base_strategy(metaclass=abc.ABCMeta):
 
         return max_my_index, max_oppo_index
 
-    def copy_new_one(self):
+    def copy_new_one(self, game_state):
         # TODO: 有必要deepcopy吗
         tmp = copy.deepcopy(self)
-        for i in range(self.oppo_minion_num):
-            tmp.oppo_minions[i] = copy.deepcopy(self.oppo_minions[i])
-        for i in range(self.my_minion_num):
-            tmp.my_minions[i] = copy.deepcopy(self.my_minions[i])
-        for i in range(self.my_hand_card_num):
-            tmp.my_hand_cards[i] = copy.deepcopy(self.my_hand_cards[i])
+        for i in range(game_state.oppo_state.oppo_minion_num):
+            tmp.oppo_minions[i] = copy.deepcopy(game_state.oppo_state.oppo_minions[i])
+        for i in range(game_state.my_state.my_minion_num):
+            tmp.my_minions[i] = copy.deepcopy(game_state.my_state.my_minions[i])
+        for i in range(game_state.my_state.my_hand_card_num):
+            tmp.my_hand_cards[i] = copy.deepcopy(game_state.my_state.my_hand_cards[i])
         return tmp
 
     @abc.abstractmethod
@@ -312,7 +186,7 @@ class base_strategy(metaclass=abc.ABCMeta):
 
     # 会返回这张卡的cost
     def use_card(self, game_state, index, *args):
-        hand_card = self.my_hand_cards[index]
+        hand_card = game_state.my_state.my_hand_cards[index]
         detail_card = hand_card.detail_card
         debug_print(f"将使用卡牌[{index}] {hand_card.name}")
         debug_print()
@@ -322,7 +196,7 @@ class base_strategy(metaclass=abc.ABCMeta):
         else:
             detail_card.use_with_arg(self, game_state, index, *args)
 
-        self.my_hand_cards.pop(index)
+        game_state.my_state.my_hand_cards.pop(index)
         return hand_card.current_cost
 
 

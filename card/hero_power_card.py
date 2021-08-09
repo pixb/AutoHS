@@ -3,7 +3,7 @@ from card.basic_card import *
 
 class TotemicCall(HeroPowerCard):
     @classmethod
-    def best_h_and_arg(cls, state, hand_card_index):
+    def best_h_and_arg(cls, state, game_state, hand_card_index):
         if not state.my_hero_power.exhausted \
                 and state.my_minion_num < 7:
             return 0.1,
@@ -11,14 +11,14 @@ class TotemicCall(HeroPowerCard):
             return 0,
 
     @classmethod
-    def use_with_arg(cls, state, card_index, *args):
+    def use_with_arg(cls, state, game_state, card_index, *args):
         click.use_skill_no_point()
         time.sleep(1)
 
 
 class LesserHeal(HeroPowerCard):
     @classmethod
-    def best_h_and_arg(cls, state, hand_card_index):
+    def best_h_and_arg(cls, state, game_state, hand_card_index):
         if state.my_hero_power.exhausted:
             return 0,
         best_index = -1
