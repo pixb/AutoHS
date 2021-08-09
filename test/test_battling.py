@@ -31,14 +31,14 @@ def update_strategy_state():
 def use_card():
     # 考虑要不要出牌
     strategy_state = update_strategy_state()
-    delta_h, index, args = strategy_state.best_h_index_arg()
+    delta_h, index, args = strategy_state.best_h_index_arg(game_state)
     print("put card:\n"
           "\t delta_h:{}\n"
           "\t index:{}\n"
           "\t args:{}\n"
           .format(delta_h, index, args))
     if delta_h > 0:
-        strategy_state.use_card(index, *args)
+        strategy_state.use_card( game_state, index, *args)
 
 
 def use_power():

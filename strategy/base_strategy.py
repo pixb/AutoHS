@@ -81,6 +81,7 @@ class base_strategy(metaclass=abc.ABCMeta):
         self.my_hand_cards.sort(key=lambda temp: temp.zone_pos)
 
         self.debug_print_out()
+        self.debug_print_out_state(game_state)
 
     def debug_print_battlefield(self):
         if not DEBUG_PRINT:
@@ -129,13 +130,33 @@ class base_strategy(metaclass=abc.ABCMeta):
         self.debug_print_battlefield()
         debug_print()
 
-        debug_print(f"水晶: {self.my_last_mana}/{self.my_total_mana}")
+        # debug_print(f"水晶: {self.my_last_mana}/{self.my_total_mana}")
         debug_print(f"我有{self.my_hand_card_num}张手牌:")
         for hand_card in self.my_hand_cards:
             debug_print(f"    [{hand_card.zone_pos}] {hand_card.name} "
                         f"cost:{hand_card.current_cost}")
         debug_print(f"我的墓地:")
         debug_print("    " + ", ".join([entity.name for entity in self.my_graveyard]))
+
+
+    def debug_print_out_state(self, game_state):
+        if not DEBUG_PRINT:
+            return
+
+        debug_print(f"game_state 对手墓地:")
+        debug_print("    " + ", ".join([entity.name for entity in game_state.oppo_state.oppo_graveyard]))
+        debug_print(f"game_state 对手有{game_state.oppo_state.oppo_hand_card_num}张手牌")
+
+        self.debug_print_battlefield()
+        debug_print()
+
+        debug_print(f"game_state 水晶: {game_state.my_state.my_last_mana}/{game_state.my_state.my_total_mana}")
+        debug_print(f"game_state 我有{game_state.my_state.my_hand_card_num}张手牌:")
+        for hand_card in game_state.my_state.my_hand_cards:
+            debug_print(f"    [{hand_card.zone_pos}] {hand_card.name} "
+                        f"cost:{hand_card.current_cost}")
+        debug_print(f"我的墓地:")
+        debug_print("    " + ", ".join([entity.name for entity in game_state.my_state.my_graveyard]))
 
     @property
     def my_last_mana(self):
@@ -290,16 +311,16 @@ class base_strategy(metaclass=abc.ABCMeta):
         pass
 
     # 会返回这张卡的cost
-    def use_card(self, index, *args):
+    def use_card(self, game_state, index, *args):
         hand_card = self.my_hand_cards[index]
         detail_card = hand_card.detail_card
         debug_print(f"将使用卡牌[{index}] {hand_card.name}")
         debug_print()
 
         if detail_card is None:
-            MinionNoPoint.use_with_arg(self, index, *args)
+            MinionNoPoint.use_with_arg(self, game_state, index, *args)
         else:
-            detail_card.use_with_arg(self, index, *args)
+            detail_card.use_with_arg(self, game_state, index, *args)
 
         self.my_hand_cards.pop(index)
         return hand_card.current_cost

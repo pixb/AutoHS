@@ -1,3 +1,6 @@
+from model.log_op import log_iter_func
+from model.my_state import my_state
+from model.oppo_state import oppo_state
 from strategy.strategy_entity import *
 from utils.print_info import *
 import constants.constants
@@ -21,6 +24,8 @@ class GameState:
         self.oppo_player_id = 0
         self.entity_dict = {}
         self.current_update_id = 0
+        self.my_state = my_state()
+        self.oppo_state = oppo_state()
 
     def __str__(self):
         res = \
@@ -368,6 +373,57 @@ def update_state(state, line_info_container):
             warn_print("my_player_id may be wrong")
             state.my_player_id, state.oppo_player_id = \
                 state.oppo_player_id, state.my_player_id
+
+############################### 下面的东西可能可以并到上面的逻辑里
+        for entity in state.entity_dict.values():
+            if entity.query_tag("ZONE") == "HAND":
+                if state.is_my_entity(entity):
+                    hand_card = entity.corresponding_entity
+                    state.my_state.my_hand_cards.append(hand_card)
+                else:
+                    state.oppo_state.oppo_hand_card_num += 1
+
+            elif entity.zone == "PLAY":
+                if entity.cardtype == "MINION":
+                    minion = entity.corresponding_entity
+                    if state.is_my_entity(entity):
+                        state.my_state.my_minions.append(minion)
+                    else:
+                        state.oppo_state.oppo_minions.append(minion)
+
+            #     elif entity.cardtype == "HERO":
+            #         hero = entity.corresponding_entity
+            #         if game_state.is_my_entity(entity):
+            #             self.my_hero = hero
+            #         else:
+            #             self.oppo_hero = hero
+            #
+            #     elif entity.cardtype == "HERO_POWER":
+            #         hero_power = entity.corresponding_entity
+            #         if game_state.is_my_entity(entity):
+            #             self.my_hero_power = hero_power
+            #         else:
+            #             self.oppo_hero_power = hero_power
+            #
+            #     elif entity.cardtype == "WEAPON":
+            #         weapon = entity.corresponding_entity
+            #         if game_state.is_my_entity(entity):
+            #             self.my_weapon = weapon
+            #         else:
+            #             self.oppo_weapon = weapon
+            #
+            elif entity.zone == "GRAVEYARD":
+                if state.is_my_entity(entity):
+                    state.my_state.my_graveyard.append(entity)
+                else:
+                    state.oppo_state.oppo_graveyard.append(entity)
+
+    # 从这里取用户的一些信息
+    if state.my_entity_id != 0:
+        # print("my entity -->{}".format(state.my_entity.query_tag("RESOURCES")))
+        state.my_state.my_total_mana = int(state.my_entity.query_tag("RESOURCES"))
+        state.my_state.my_used_mana = int(state.my_entity.query_tag("RESOURCES_USED"))
+        state.my_state.my_temp_mana = int(state.my_entity.query_tag("TEMP_RESOURCES"))
 
     return True
 

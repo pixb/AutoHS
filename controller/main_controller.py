@@ -224,15 +224,17 @@ class main_controller(object):
             strategy_state = general_strategy(game_state)
 
             # 考虑要不要出牌
-            delta_h, index, args = strategy_state.best_h_index_arg()
+            delta_h, index, args = strategy_state.best_h_index_arg(game_state)
             if delta_h > 0:
-                strategy_state.use_card(index, *args)
+                strategy_state.use_card(game_state, index, *args)
                 continue
 
             # 考虑要不要用技能
             hero_power = strategy_state.my_detail_hero_power
+            print("#### strategy my_last_manna:{}".format(strategy_state.my_last_mana))
+            print("#### my_state my_last_manna:{}".format(game_state.my_state.my_last_mana))
             if hero_power and strategy_state.my_last_mana >= 2:
-                delta_h, *args = hero_power.best_h_and_arg(strategy_state, -1)
+                delta_h, *args = hero_power.best_h_and_arg(strategy_state, game_state, -1)
                 debug_print(str(delta_h) + str(args))
                 if delta_h > 0:
                     hero_power.use_with_arg(strategy_state, -1, *args)

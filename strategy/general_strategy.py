@@ -13,7 +13,7 @@ from utils.print_info import debug_print
 
 class general_strategy(base_strategy):
 
-    def best_h_index_arg(self):
+    def best_h_index_arg(self, game_state):
         debug_print()
         best_delta_h = 0
         best_index = -1
@@ -30,13 +30,13 @@ class general_strategy(base_strategy):
             detail_card = hand_card.detail_card
             if detail_card is None:
                 if hand_card.cardtype == CARD_MINION and not hand_card.battlecry:
-                    delta_h, *args = MinionNoPoint.best_h_and_arg(self, hand_card_index)
+                    delta_h, *args = MinionNoPoint.best_h_and_arg(self, game_state, hand_card_index)
                     debug_print(f"(默认行为) card[{hand_card_index}]({hand_card.name}) "
                                 f"delta_h: {delta_h}, *args: {[]}")
                 else:
                     debug_print(f"卡牌[{hand_card_index}]({hand_card.name})无法评判")
             else:
-                delta_h, *args = detail_card.best_h_and_arg(self, hand_card_index)
+                delta_h, *args = detail_card.best_h_and_arg(self,game_state, hand_card_index)
                 debug_print(f"(手写行为) card[{hand_card_index}]({hand_card.name}) "
                             f"delta_h: {delta_h}, *args: {args}")
 
