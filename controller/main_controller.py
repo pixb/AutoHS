@@ -359,17 +359,16 @@ class main_controller(object):
         sys_print("Entering State " + str(self._fsm_state))
 
         if self._fsm_state == FSM_LEAVE_HS:
-            self._view.show_time()
             warn_print("HearthStone not found! Try to go back to HS")
 
         if self._fsm_state == FSM_CHOOSING_CARD:
             game_count += 1
             sys_print("The " + str(game_count) + " game begins")
-            time_begin = self._view.show_time()
+            time_begin = time.time()
 
         if self._fsm_state == FSM_QUITTING_BATTLE:
             sys_print("The " + str(game_count) + " game ends")
-            time_now = self._view.show_time()
+            time_now = time.time()
             if time_begin > 0:
                 info_print("The last game last for : {} mins {} secs"
                            .format(int((time_now - time_begin) // 60),

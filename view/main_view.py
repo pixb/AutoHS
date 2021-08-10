@@ -13,11 +13,6 @@ from view import click
 
 class main_view(object):
 
-    def show_time(slef):
-        info_print("Now the time is " +
-                   time.strftime("%m-%d %H:%M:%S", time.localtime()))
-        return time.time()
-
     def use_power_no_point(self):
         click.use_skill_no_point()
         time.sleep(1)
