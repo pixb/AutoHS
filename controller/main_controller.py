@@ -14,6 +14,7 @@ import keyboard
 from model.log_op import log_iter_func
 from model.game_state import check_name, GameState, update_state
 from model.main_model import main_model
+from strategy.never_power_strategy import never_power_strategy
 from utils.print_info import *
 from strategy.general_strategy import general_strategy
 from view import click, get_screen
@@ -25,6 +26,16 @@ win_count = 0
 quitting_flag = False
 game_state = GameState()
 log_iter = log_iter_func(HEARTHSTONE_POWER_LOG_PATH)
+strategy = None
+
+
+def get_strategy_mode():
+    strategies = {
+        0: never_power_strategy(game_state),
+        1: general_strategy(game_state)
+    }
+    return strategies.get(GAME_STRATEGY)
+    # return strategy
 
 
 def system_exit():
@@ -120,6 +131,7 @@ class main_controller(object):
                 return FSM_ERROR
 
     def ChoosingCardAction(self):
+        global strategy
         self.print_out()
         time.sleep(21)
         loop_count = 0
@@ -134,7 +146,7 @@ class main_controller(object):
             if game_state.is_end:
                 return FSM_QUITTING_BATTLE
             game_state.update_user_state()
-            strategy_state = general_strategy(game_state)
+            strategy = get_strategy_mode()
             hand_card_num = game_state.my_state.my_hand_card_num
 
             # 等待被替换的卡牌 ZONE=HAND
@@ -149,7 +161,7 @@ class main_controller(object):
                         my_hand_card.current_cost <= REPLACE_COST_BAR
                 else:
                     should_keep_in_hand = \
-                        detail_card.keep_in_hand(strategy_state, my_hand_index)
+                        detail_card.keep_in_hand(strategy, my_hand_index)
 
                 if not should_keep_in_hand:
                     click.replace_starting_card(my_hand_index, hand_card_num)
@@ -165,6 +177,7 @@ class main_controller(object):
     def Battling(self):
         global win_count
         global game_state
+        global strategy
 
         self.print_out()
 
@@ -222,25 +235,26 @@ class main_controller(object):
             # time.sleep(0.5)
 
             game_state.update_user_state()
-            strategy_state = general_strategy(game_state)
+
+            strategy = get_strategy_mode()
 
             # 考虑要不要出牌
-            delta_h, index, args = strategy_state.best_h_index_arg(game_state)
+            delta_h, index, args = strategy.best_h_index_arg(game_state)
             if delta_h > 0:
-                strategy_state.use_card(game_state, index, *args)
+                strategy.use_card(game_state, index, *args)
                 continue
 
             # 考虑要不要用技能
             hero_power = game_state.my_state.my_detail_hero_power
             print("#### my_state my_last_manna:{}".format(game_state.my_state.my_last_mana))
             if hero_power and game_state.my_state.my_last_mana >= 2:
-                delta_h, *args = hero_power.best_h_and_arg(strategy_state, game_state, -1)
+                delta_h, *args = hero_power.best_h_and_arg(strategy, game_state, -1)
                 debug_print(str(delta_h) + str(args))
                 if delta_h > 0:
-                    hero_power.use_with_arg(strategy_state, -1, *args)
+                    hero_power.use_with_arg(strategy, game_state, -1, *args)
 
             # 考虑随从怎么打架
-            mine_index, oppo_index = strategy_state.get_best_attack_target(game_state)
+            mine_index, oppo_index = strategy.get_best_attack_target(game_state)
 
             if mine_index != -1:
                 if oppo_index == -1:

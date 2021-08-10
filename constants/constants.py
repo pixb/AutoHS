@@ -3,7 +3,12 @@
 HEARTHSTONE_POWER_LOG_PATH = "C:/game/Hearthstone/Logs/Power.log"
 
 # 你的炉石用户名, 注意英文标点符号, 把后面的数字也带上
-YOUR_NAME = "冰河#52285"
+YOUR_NAME = "xx#65443"
+
+# 游戏策略的模式
+#  0 = 每回合只放技能
+#  1 = 正常对战模式
+GAME_STRATEGY = 1
 
 # 关于控制台信息打印的设置
 DEBUG_PRINT = True
