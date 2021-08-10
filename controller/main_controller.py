@@ -238,7 +238,6 @@ class main_controller(object):
                 debug_print(str(delta_h) + str(args))
                 if delta_h > 0:
                     hero_power.use_with_arg(strategy_state, -1, *args)
-                    continue
 
             # 考虑随从怎么打架
             mine_index, oppo_index = strategy_state.get_best_attack_target(game_state)

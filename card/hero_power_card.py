@@ -33,16 +33,16 @@ class LesserHeal(HeroPowerCard):
         return best_delta_h, best_index
 
     @classmethod
-    def use_with_arg(cls, state, card_index, *args):
+    def use_with_arg(cls, state, game_state, card_index, *args):
         click.use_skill_point_mine(args[0], state.my_minion_num)
         time.sleep(1)
 
 class BallistaShot(HeroPowerCard):
     @classmethod
-    def best_h_and_arg(cls, state, hand_card_index):
+    def best_h_and_arg(cls, state, game_state, hand_card_index):
         return 1,-1
 
     @classmethod
-    def use_with_arg(cls, state, card_index, *args):
+    def use_with_arg(cls, state, game_state, card_index, *args):
         click.use_skill_no_point()
         time.sleep(1)
