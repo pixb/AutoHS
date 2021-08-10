@@ -169,7 +169,7 @@ class main_controller(object):
                         my_hand_card.current_cost <= REPLACE_COST_BAR
                 else:
                     should_keep_in_hand = \
-                        detail_card.keep_in_hand(strategy, my_hand_index)
+                        detail_card.keep_in_hand(strategy, game_state, my_hand_index)
 
                 if not should_keep_in_hand:
                     click.replace_starting_card(my_hand_index, hand_card_num)
