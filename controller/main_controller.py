@@ -140,7 +140,7 @@ class main_controller(object):
         loop_count = 0
 
         if GAME_STRATEGY == 0:
-            time.sleep(30)
+            time.sleep(20)
             click.commit_choose_card()
             return FSM_BATTLING
 
