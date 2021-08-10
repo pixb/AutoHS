@@ -2,11 +2,11 @@
 # @Time    : 2021/8/9 7:31
 # @Author  : pixb
 # @Email   : tpxsky@163.com
-# @File    : my_state.py
+# @File    : t_my_state.py
 # @Software: PyCharm
 # @Description: my game state info
 
-class oppo_state:
+class t_oppo_state:
     def __init__(self):
         self.oppo_graveyard = []
         self.oppo_minions = []

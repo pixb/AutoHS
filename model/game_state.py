@@ -1,6 +1,6 @@
 from model.log_op import log_iter_func
-from model.my_state import my_state
-from model.oppo_state import oppo_state
+from model.t_my_state import t_my_state
+from model.t_oppo_state import t_oppo_state
 from strategy.strategy_entity import *
 from utils.print_info import *
 import constants.constants
@@ -24,8 +24,8 @@ class GameState:
         self.oppo_player_id = 0
         self.entity_dict = {}
         self.current_update_id = 0
-        self.my_state = my_state()
-        self.oppo_state = oppo_state()
+        self.my_state = t_my_state()
+        self.oppo_state = t_oppo_state()
 
     def __str__(self):
         res = \
