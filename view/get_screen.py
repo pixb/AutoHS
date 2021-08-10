@@ -78,14 +78,16 @@ def get_state():
 
     im_opencv = catch_screen()
 
-    if list(im_opencv[1070][1090]) == [23, 52, 105, 255]:
+    if list(im_opencv[1070][1090]) == [23, 52, 105, 255] or list(im_opencv[1070][1090]) == [23, 51, 105, 255]:
         return FSM_MAIN_MENU
     if list(im_opencv[1070][1090]) == [8, 18, 24, 255]:
         return FSM_CHOOSING_HERO
     if list(im_opencv[1070][1090]) == [17, 18, 19, 255]:
         return FSM_MATCHING
-    if list(im_opencv[860][960]) == [71, 71, 71, 255]:
+    if list(im_opencv[860][960]) == [71, 71, 71, 255] or list(im_opencv[1070][1090]) == [8, 8, 11, 255]:
         return FSM_CHOOSING_CARD
+    if list(im_opencv[1070][1090]) == [17, 18, 19, 255]:
+        return FSM_QUITTING_BATTLE
 
     return FSM_BATTLING
 

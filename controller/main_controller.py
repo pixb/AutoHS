@@ -116,6 +116,9 @@ class main_controller(object):
 
             click.commit_error_report()
 
+            if GAME_STRATEGY == 0:
+                return FSM_CHOOSING_CARD
+
             ok = update_game_state()
             if ok:
                 if not game_state.is_end:
@@ -135,6 +138,11 @@ class main_controller(object):
         self.print_out()
         time.sleep(21)
         loop_count = 0
+
+        if GAME_STRATEGY == 0:
+            time.sleep(30)
+            click.commit_choose_card()
+            return FSM_BATTLING
 
         while True:
             ok = update_game_state()
@@ -188,6 +196,14 @@ class main_controller(object):
         while True:
             if quitting_flag:
                 sys.exit(0)
+
+            if GAME_STRATEGY == 0:
+                self._view.use_power_no_point()
+                click.end_turn()
+                time.sleep(3)
+                if get_screen.get_state() == FSM_CHOOSING_HERO:
+                    return FSM_CHOOSING_HERO
+                continue
 
             ok = update_game_state()
             if not ok:
@@ -363,7 +379,8 @@ class main_controller(object):
 
     def init(self):
         global game_state, log_iter
-
+        if GAME_STRATEGY == 0:
+            return
         # 有时候炉石退出时python握着Power.log的读锁, 因而炉石无法
         # 删除Power.log. 而当炉石重启时, 炉石会从头开始写Power.log,
         # 但此时python会读入完整的Power.log, 并在原来的末尾等待新的写入. 那
