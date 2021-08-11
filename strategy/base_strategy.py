@@ -116,16 +116,9 @@ class base_strategy(metaclass=abc.ABCMeta):
                 self.my_minions.pop(my_index)
 
     def get_best_attack_target(self, game_state):
-        could_attack_oppos = []
-        has_taunt = False
-
-        for i in range(len(game_state.oppo_state.oppo_minions)):
-            if game_state.oppo_state.oppo_minions[i].taunt:
-                could_attack_oppos.append(i)
-                has_taunt = True
-
-        if not has_taunt:
-            could_attack_oppos = [i for i in range(len(game_state.oppo_state.oppo_minions))]
+        touchable_oppo_minions = game_state.oppo_state.touchable_oppo_minions
+        has_taunt = game_state.oppo_state.oppo_has_taunt
+        beat_face_win = game_state.my_state.my_total_attack >= game_state.oppo_state.oppo_hero.health
 
         max_delta_h_val = 0
         max_my_index = -2
@@ -137,10 +130,28 @@ class base_strategy(metaclass=abc.ABCMeta):
             if not my_minion.can_attack_minion:
                 continue
 
-            for oppo_index in could_attack_oppos:
-                oppo_minion = game_state.oppo_state.oppo_minions[oppo_index]
-                if oppo_minion.stealth:
-                    continue
+            # 如果没有墙,自己又能打脸,应该试一试
+            if not has_taunt and my_minion.can_beat_face:
+                if beat_face_win:
+                    debug_print(f"攻击决策: [{my_index}]({my_minion.name})->"
+                                f"[-1]({game_state.oppo_state.oppo_hero.name}) "
+                                f"斩杀了")
+                    return my_index, -1
+
+                tmp_delta_h = game_state.oppo_state.oppo_hero.delta_h_after_damage(my_minion.attack)
+
+                debug_print(f"攻击决策: [{my_index}]({my_minion.name})->"
+                            f"[-1]({game_state.oppo_state.oppo_hero.name}) "
+                            f"delta_h_val:{tmp_delta_h}")
+
+                if tmp_delta_h > max_delta_h_val:
+                    max_delta_h_val = tmp_delta_h
+                    max_my_index = my_index
+                    max_oppo_index = -1
+                    min_attack = 999
+
+            for oppo_minion in touchable_oppo_minions:
+                oppo_index = oppo_minion.zone_pos - 1
 
                 tmp_delta_h = 0
                 tmp_delta_h -= MY_DELTA_H_FACTOR * \
@@ -159,25 +170,17 @@ class base_strategy(metaclass=abc.ABCMeta):
                     max_oppo_index = oppo_index
                     min_attack = my_minion.attack
 
-            # 如果没有墙,自己又能打脸,应该试一试
-            if not has_taunt:
-                if my_minion.can_beat_face:
-                    tmp_delta_h = game_state.oppo_state.oppo_hero.delta_h_after_damage(my_minion.attack)
-
-                    debug_print(f"攻击决策: [{my_index}]({my_minion.name})打脸, "
-                                f"delta_h_val:{tmp_delta_h}")
-
-                    if tmp_delta_h > max_delta_h_val:
-                        max_delta_h_val = tmp_delta_h
-                        max_my_index = my_index
-                        max_oppo_index = -1
-
         # 试一试英雄攻击
         if game_state.my_state.my_hero.can_attack:
-            for oppo_index in could_attack_oppos:
-                oppo_minion = game_state.oppo_state.oppo_minions[oppo_index]
-                if oppo_minion.stealth:
-                    continue
+            if not has_taunt:
+                if beat_face_win:
+                    debug_print(f"攻击决策: [-1]({game_state.my_state.my_hero.name})->"
+                                f"[-1]({game_state.oppo_state.oppo_hero.name}) "
+                                f"斩杀了")
+                    return -1, -1
+
+            for oppo_minion in touchable_oppo_minions:
+                oppo_index = oppo_minion.zone_pos - 1
 
                 tmp_delta_h = 0
                 tmp_delta_h += OPPO_DELTA_H_FACTOR * \
@@ -193,6 +196,9 @@ class base_strategy(metaclass=abc.ABCMeta):
                 if tmp_delta_h >= max_delta_h_val:
                     max_my_index = -1
                     max_oppo_index = oppo_index
+
+        debug_print(f"最终决策: max_my_index: {max_my_index}, "
+                    f"max_oppo_index: {max_oppo_index}")
 
         return max_my_index, max_oppo_index
 

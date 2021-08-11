@@ -66,3 +66,26 @@ class t_oppo_state:
         for minion in self.oppo_minions:
             total_h_val += minion.heuristic_val
         return total_h_val
+
+    @property
+    def touchable_oppo_minions(self):
+        ret = []
+
+        for oppo_minion in self.oppo_minions:
+            if oppo_minion.taunt and not oppo_minion.stealth:
+                ret.append(oppo_minion)
+
+        if len(ret) == 0:
+            for oppo_minion in self.oppo_minions:
+                if not oppo_minion.stealth:
+                    ret.append(oppo_minion)
+
+        return ret
+
+    @property
+    def oppo_has_taunt(self):
+        for oppo_minion in self.oppo_minions:
+            if oppo_minion.taunt and not oppo_minion.stealth:
+                return True
+
+        return False

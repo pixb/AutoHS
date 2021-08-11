@@ -91,4 +91,16 @@ class t_my_state:
         return self.my_hero_power.detail_hero_power
 
     def my_total_spell_power(self):
-        return sum([minion.spell_power for minion in my_state.my_minions])
+        return sum([minion.spell_power for minion in self.my_minions])
+
+    @property
+    def my_total_attack(self):
+        count = 0
+        for my_minion in self.my_minions:
+            if my_minion.can_beat_face:
+                count += my_minion.attack
+
+        if self.my_hero.can_attack:
+            count += self.my_hero.attack
+
+        return count

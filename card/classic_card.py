@@ -49,10 +49,10 @@ class Hex(SpellPointOppo):
 
 # 闪电风暴
 class LightningStorm(SpellNoPoint):
-    bias = -8
+    bias = -10
 
     @classmethod
-    def best_h_and_arg(cls, state, hand_card_index):
+    def best_h_and_arg(cls, state, game_state, hand_card_index):
         h_sum = 0
         spell_power = state.my_total_spell_power
 
@@ -246,4 +246,14 @@ class DoomSayer(MinionNoPoint):
 
 class StormforgedAxe(WeaponCard):
     keep_in_hand_bool = True
-    value = 2.5
+    value = 1.5
+
+    @classmethod
+    def best_h_and_arg(cls, state, game_state, hand_card_index):
+        if game_state.my_state.my_total_mana == 2:
+            for oppo_minion in game_state.oppo_state.touchable_oppo_minions:
+                # 如果能提起刀解了, 那太好了
+                if oppo_minion.health <= 2:
+                    return 2000,
+
+        return cls.value,
