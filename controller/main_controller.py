@@ -85,9 +85,13 @@ class main_controller(object):
             self._fsm_state = self.FSM_dispatch(self._fsm_state)
 
     def MainMenuAction(self):
+
         self.print_out()
         time.sleep(30)
         while True:
+            if quitting_flag:
+                sys.exit(0)
+
             click.enter_battle_mode()
             time.sleep(5)
 
@@ -103,6 +107,7 @@ class main_controller(object):
 
     def ChoosingHeroAction(self):
         self.print_out()
+        time.sleep(2)
         click.match_opponent()
         time.sleep(1)
         return FSM_MATCHING
@@ -217,6 +222,7 @@ class main_controller(object):
                     info_print("你输了")
                 return FSM_QUITTING_BATTLE
 
+            # 在对方回合等就行了
             if not game_state.is_my_turn:
                 last_controller_is_me = False
                 mine_count = 0
@@ -226,21 +232,27 @@ class main_controller(object):
                     warn_print("Time out in Opponent's turn")
                     return FSM_ERROR
 
-                # time.sleep(0.5)
                 continue
 
             # 接下来考虑在我的回合的出牌逻辑
+
+            # 如果是这个我的回合的第一次操作
             if not last_controller_is_me:
                 time.sleep(5.5)
+                # 在游戏的第一个我的回合, 发一个你好
+                # game_num_turns_in_play在每一个回合开始时都会加一, 即
+                # 后手放第一个回合这个数是2
                 if game_state.game_num_turns_in_play <= 2:
                     click.emoj(0)
                 else:
+                    # 在之后每个回合开始时有概率发表情
                     if random.random() < EMOJ_RATIO:
                         click.emoj()
 
             last_controller_is_me = True
             not_mine_count = 0
             mine_count += 1
+
             if mine_count >= 20:
                 if mine_count >= 40:
                     return FSM_ERROR
@@ -248,36 +260,25 @@ class main_controller(object):
                 click.commit_error_report()
                 click.cancel_click()
                 time.sleep(STATE_CHECK_INTERVAL)
-            # time.sleep(0.5)
 
+            debug_print("-" * 80)
             game_state.update_user_state()
-
             strategy = get_strategy_mode()
 
             # 考虑要不要出牌
-            delta_h, index, args = strategy.best_h_index_arg(game_state)
-            if delta_h > 0:
-                strategy.use_card(game_state, index, *args)
+            index, args = strategy.best_h_index_arg(game_state)
+
+            # index == -1 代表使用技能, -2 代表不出牌
+            if index != -2:
+                strategy.use_best_entity(game_state, index, args)
                 continue
 
-            # 考虑要不要用技能
-            hero_power = game_state.my_state.my_detail_hero_power
-            print("#### my_state my_last_manna:{}".format(game_state.my_state.my_last_mana))
-            if hero_power and game_state.my_state.my_last_mana >= 2:
-                delta_h, *args = hero_power.best_h_and_arg(strategy, game_state, -1)
-                debug_print(str(delta_h) + str(args))
-                if delta_h > 0:
-                    hero_power.use_with_arg(strategy, game_state, -1, *args)
+            # 如果不出牌, 考虑随从怎么打架
+            my_index, oppo_index = strategy.get_best_attack_target(game_state)
 
-            # 考虑随从怎么打架
-            mine_index, oppo_index = strategy.get_best_attack_target(game_state)
-
-            if mine_index != -1:
-                if oppo_index == -1:
-                    click.minion_beat_hero(mine_index, game_state.my_state.my_minion_num)
-                else:
-                    click.minion_beat_minion(mine_index, game_state.my_state.my_minion_num,
-                                             oppo_index, game_state.oppo_state.oppo_minion_num)
+            # my_index == -1代表英雄攻击, -2 代表不攻击
+            if my_index != -2:
+                strategy.my_entity_attack_oppo(game_state, my_index, oppo_index)
             else:
                 click.end_turn()
                 time.sleep(STATE_CHECK_INTERVAL)
@@ -356,7 +357,7 @@ class main_controller(object):
         global time_begin
         global game_count
 
-        sys_print("Entering State " + str(self._fsm_state))
+        sys_print("Enter State " + str(self._fsm_state))
 
         if self._fsm_state == FSM_LEAVE_HS:
             warn_print("HearthStone not found! Try to go back to HS")
