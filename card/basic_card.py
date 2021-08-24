@@ -10,7 +10,7 @@ class Card(ABC):
     keep_in_hand_bool = True
 
     @classmethod
-    def keep_in_hand(cls, state, game_state, hand_card_index):
+    def keep_in_hand(cls):
         return cls.keep_in_hand_bool
 
     # 用来指示这张卡的价值, 在 best_h_and_arg 中返回.

@@ -40,4 +40,7 @@ class Test(TestCase):
     def test_update_game_state(self):
         ok = update_game_state()
         print("update_game_state()={}".format(ok))
+        print("=" * 100)
+        print("game state, turns:{}\n".format(game_state.game_num_turns_in_play))
+        print(game_state)
         return True

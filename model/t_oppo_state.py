@@ -5,6 +5,9 @@
 # @File    : t_my_state.py
 # @Software: PyCharm
 # @Description: my game state info
+from hearthstone.entities import Player
+from hearthstone.enums import CardType, Zone, GameTag
+
 
 class t_oppo_state:
     def __init__(self):
@@ -14,6 +17,26 @@ class t_oppo_state:
         self.oppo_hero = None
         self.oppo_weapon = None
         self.oppo_hero_power = None
+
+    def init(self, player: Player):
+        print("\t ====  t_oppo_state init()   == \n")
+        self.oppo_hand_card_num = 0
+        self.oppo_minions.clear()
+        self.oppo_graveyard.clear()
+        for et in player.entities:
+            if et.zone == Zone.HAND:
+                self.oppo_hand_card_num += 1
+            if et.zone == Zone.PLAY:
+                if et.type == CardType.MINION:
+                    self.oppo_minions.append(et)
+                if et.type == CardType.HERO:
+                    self.oppo_hero = et
+                if et.type == CardType.HERO_POWER:
+                    self.oppo_hero_power = et
+                if et.type == CardType.WEAPON:
+                    self.oppo_weapon = et
+            if et.zone == Zone.GRAVEYARD:
+                self.oppo_graveyard.append(et)
 
     def update(self, game_state):
         self.oppo_hand_card_num = 0

@@ -259,6 +259,8 @@ class CardEntity(Entity):
         self.card_id = card_id
 
 
+
+
 def update_state(state, line_info_container):
     if line_info_container.line_type == LOG_LINE_CREATE_GAME:
         sys_print("Read in new game and flush state")

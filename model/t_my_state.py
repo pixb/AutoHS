@@ -5,6 +5,9 @@
 # @File    : t_my_state.py
 # @Software: PyCharm
 # @Description: my game state info
+from hearthstone.entities import Player
+from hearthstone.enums import Zone, CardType, GameTag, PlayState
+
 
 class t_my_state:
     def __init__(self):
@@ -18,6 +21,34 @@ class t_my_state:
         self.my_minions = []
         self.my_graveyard = []
         self.can_use_power = False
+        self.player = None
+
+    def init(self, player: Player):
+        print("\t ====  t_my_state init()   == \n")
+        self.player = player
+        self.my_hand_cards.clear()
+        self.my_minions.clear()
+        self.my_graveyard.clear()
+        for et in player.entities:
+            if et.zone == Zone.HAND:
+                self.my_hand_cards.append(et)
+            if et.zone == Zone.PLAY:
+                if et.type == CardType.MINION:
+                    self.my_minions.append(et)
+                if et.type == CardType.HERO:
+                    self.my_hero = et
+                if et.type == CardType.HERO_POWER:
+                    self.my_hero_power = et
+                if et.type == CardType.WEAPON:
+                    self.my_weapon = et
+            if et.zone == Zone.GRAVEYARD:
+                self.my_graveyard.append(et)
+        self.my_total_mana = player.tags.get(GameTag.RESOURCES)
+        self.my_used_mana = player.tags.get(GameTag.RESOURCES_USED)
+        self.my_temp_mana = player.tags.get(GameTag.TEMP_RESOURCES)
+        self.my_minions.sort(key=lambda temp: temp.tags.get(GameTag.ZONE_POSITION))
+        self.my_hand_cards.sort(key=lambda temp: temp.tags.get(GameTag.ZONE_POSITION))
+        print("====================hand card count:{}".format(self.my_hand_card_num))
 
     def update(self, game_state):
         self.my_hand_cards.clear()
@@ -104,3 +135,19 @@ class t_my_state:
             count += self.my_hero.attack
 
         return count
+
+    def is_end_win(self):
+        if self.player is None:
+            return False
+        return self.player.tags.get(GameTag.PLAYSTATE) == PlayState.WON
+
+    @property
+    def is_my_turn(self):
+        return self.player.tags.get(GameTag.CURRENT_PLAYER) == self.player.player_id
+
+    @property
+    def num_turns_in_play(self):
+        if self.player.tags.get(GameTag.NUM_TURNS_IN_PLAY) is None:
+            return 0
+        else:
+            return self.player.tags.get(GameTag.NUM_TURNS_IN_PLAY)

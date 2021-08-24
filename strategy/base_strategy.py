@@ -15,7 +15,7 @@ from view import click
 
 
 class base_strategy(metaclass=abc.ABCMeta):
-    def __init__(self, game_state=None):
+    def __init__(self, game_state=None, a_game_state=None):
         self.debug_print_out_state(game_state)
 
     def debug_print_battlefield(self, game_state):
